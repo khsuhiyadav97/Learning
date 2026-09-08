@@ -17,21 +17,27 @@ role = "Experienced HR Assistant"
 # Structured format information
 
 from pydantic import BaseModel
-class Resume(BaseModel):
+class Job_desciption(BaseModel):
     role : str
-    required_skills : str
-    preferred_skills : str
-    experience : int
-    responsibilities : str
+    required_skills : list[str]
+    preferred_skills : list[str]
+    experience : float | None
+    educational_requirements : list[str]
+    responsibilities : list[str]
 
 
-jd_schema = Resume.model_json_schema()
+jd_schema = Job_desciption.model_json_schema()
 
-response_format = {
-    "type" : "json_object"
-}
 system_prompt = f"""
-Extract the job description from the Reaume strictly based on this schema. And provide a json foramt reponse. {jd_schema}
+You are an experienced HR assistant. Your job is to analyse the job desciptions and extract structured information from these. Return only valid json matching this schema. {jd_schema}
+Important:
+ Do not return the schema itself.
+ Do not return fields like "properties", "title", or "type".
+ Fill this schema with the actual extracted info from this schema
+
+ If minimum experience is not mentioned, return null.
+ If information from a list is missing, return an empty list.
+ Do not invent information.
 """
 
 message_system = {
@@ -84,25 +90,59 @@ This position will be open for a minimum of 5 days, with applications accepted o
 Microsoft is an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to age, ancestry, citizenship, color, family or medical care leave, gender identity or expression, genetic information, immigration status, marital status, medical condition, national origin, physical or mental disability, political affiliation, protected veteran or military status, race, ethnicity, religion, sex (including pregnancy), sexual orientation, or any other characteristic protected by applicable local laws, regulations and ordinances. If you need assistance with religious accommodations and/or a reasonable accommodation due to a disability during the application process, read more about requesting accommodations."""
 
 prompt = f"""
-This is a resume parse from a job description. Please extract the relevant information from this. {job_desciption}
+Analyze the following job description {job_desciption}
 """
-message = {
-    "role" : role,
+message_user = {
+    "role" : "user",
     "content" : prompt
 }
-messages = [message_system, message]
+response_format = {
+    "type" : "json_object"
+}
+messages = [message_system, message_user]
 response = client.chat.completions.create(model = model, messages = messages, response_format = response_format)
 
 answer = response.choices[0].message.content
-print(answer)
 
 # Load
 import json
 raw_json = answer
-data_file = json.loads(raw_json)
-resume_parser = Resume(**data_file)
+job_data = json.loads(raw_json)
+jobD = Job_desciption(**job_data)
 
 # You can see it directly
-print(resume_parser.role)
-print(resume_parser.required_skills)
-print(resume_parser.experience)
+print(jobD.experience)
+print(jobD.required_skills)
+
+
+# Parsing
+class MatchResult(BaseModel):
+    score : float
+    details : dict
+
+class Experience(BaseModel):
+    company : str | None = None
+    role : str | None = None
+    duration : str | None = None
+    description : str | None = None
+    skills_used : list[str] = []
+
+class resume(BaseModel):
+    name : str | None = None
+    email : str | None = None
+    phone : str | None = None
+
+    total_experience_years : float | None = None
+
+    skills : list[str] = []
+    experinces : list[Experience] = []
+    education : list[str] = []
+    project : list[str] = []
+    certifications : list[str] = []
+
+# resume_schema = resume.model_json_schema()
+# def final_score(job, Reusme):
+#     match_schema = MatchResult.model_json_schema()
+#     prompt = f"""You are an HR recruiter. 
+#     Compare the candidate's resume with the job description."""
+
