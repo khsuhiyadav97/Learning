@@ -17,6 +17,7 @@ role = "Experienced HR Assistant"
 # Structured format information
 
 from pydantic import BaseModel
+
 class Job_desciption(BaseModel):
     role : str
     required_skills : list[str]
@@ -140,9 +141,27 @@ class resume(BaseModel):
     project : list[str] = []
     certifications : list[str] = []
 
-# resume_schema = resume.model_json_schema()
-# def final_score(job, Reusme):
-#     match_schema = MatchResult.model_json_schema()
-#     prompt = f"""You are an HR recruiter. 
-#     Compare the candidate's resume with the job description."""
+resume_schema = resume.model_json_schema()
+
+def final_score(job, Reusme):
+    match_schema = MatchResult.model_json_schema()
+    prompt = f"""You are an HR recruiter. 
+    Compare the candidate's resume with the job description.
+    
+    JOB DESCRIPTION: 
+    {job.model_dump_json(indent=2)}
+
+    CANDIDATE RESUME:
+    {resume.model_dumps_json(indent = 2)}
+Return json matching this schema:
+ {match_schema}
+
+Give me:
+
+1- Candidate's name
+2- Matching skills
+3- Missing important skills
+4- Whether experience requirement is not
+5- Overall matching percentage 0 to 100
+6- A short final verdict."""
 
