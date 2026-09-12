@@ -163,5 +163,17 @@ Give me:
 3- Missing important skills
 4- Whether experience requirement is not
 5- Overall matching percentage 0 to 100
-6- A short final verdict."""
+6- A short final verdict.
 
+Keep the response short and concised."""
+
+message= {
+    "role": "user",
+    "content" : prompt
+}
+messages = [message]
+response_format = {
+    "type" : "json_object",
+}
+
+response = client.chat.completions.create(model = model, messages = messages, response_format = response_format)
