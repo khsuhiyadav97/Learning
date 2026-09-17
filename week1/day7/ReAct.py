@@ -88,18 +88,3 @@ def run_agent(question):
         answer = response.choices[0].message.content
 
         print(answer)
-
-        #Agent has finished
-        if "final_answer" in answer:
-            break
-
-        #find the action
-        match = re.search(r"Action:\s*(\w+)\((.*?)\)",answer)
-
-        if match:
-
-            tool_name = match.group(1)
-            tool_input = match.group(2)
-            tool_input = tool_input.strip()
-            tool_input = match.group(2)
-            tool_input = match.group(2)
