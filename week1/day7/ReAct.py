@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+import re
+from anyio import sleep
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -12,7 +14,7 @@ if not my_api_key:
 
 client = Groq(api_key = my_api_key)
 
-model = "openai/gpt-oss-20b"
+model = "openai/gpt-oss-120b"
 
 # tools
 def product_price(product):
@@ -84,7 +86,56 @@ def run_agent(question):
         print("STEP", step+1)
         print("----------------/n")
 
-        response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages= messages, temperature=0)
+        response = client.chat.completions.create(model="openai/gpt-oss-120b", messages= messages, temperature=0)
         answer = response.choices[0].message.content
 
         print(answer)
+
+        #Agent has finished
+        if "final_answer:" in answer:
+            break
+
+        #Find the action
+
+        match = re.search(
+            r"Action:\s*(\w+)\((.*?)\)",
+            answer
+        )
+
+        if match:
+
+            tool_name = match.group(1)
+            tool_input = match.group(2)
+            tool_input = match.input.strip()
+            tool_input = match.input.strip('"')
+
+            #Run the tool
+            if tool_name in tools:
+
+                tool = tools[tool_name]
+                observation = tool(tool_input)
+
+            else:
+                observation = "Tool not found"
+
+            print("Observation:", observation)
+
+            #Ask LLM response to memory
+
+            messages.append({
+                "role": "assistant",
+                "content": answer
+            })
+
+            #Give ttool results back to the agent
+
+            messages.append({
+                "role": "user",
+                "content": "Observation: "+ str(observation)
+            })
+            sleep(5)
+
+prompt = """I have 200000 ruppees, what is the price of an iphone16?
+and how much money will I have left?
+"""
+run_agent(prompt)
