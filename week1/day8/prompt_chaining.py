@@ -1,0 +1,16 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv()
+
+my_api_key = os.getenv("GROQ_API_KEY")
+
+if not my_api_key:
+    raise ValueError("Api Error, There's no api_key")
+
+client = Groq(api_key = my_api_key)
+
+model = "qwen/qwen3.6-27b"
+role = "user"

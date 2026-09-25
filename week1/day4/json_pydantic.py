@@ -28,7 +28,7 @@ response_format = {
     "type" : "json_object"
 }
 system_prompt = f"""
-Extract the personal information fromt the ticket strictly based on this schema. And provide a json foramt reponse. {schema}
+Extract the personal information from the ticket strictly based on this schema. And provide a json foramt reponse. {schema}
 """
 
 message_system = {
