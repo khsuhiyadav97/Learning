@@ -1,179 +1,318 @@
 import os
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
+from pydantic import BaseModel, Field
 
 load_dotenv()
-
-my_api_key = os.getenv("GROQ_API_KEY")
+my_api_key=os.getenv("GROQ_API_KEY")
 
 if not my_api_key:
-    raise ValueError("Api Error, There's no api_key")
+    raise ValueError("API key kaha hai bhai")
 
-client = Groq(api_key = my_api_key)
-
-model = "qwen/qwen3.6-27b"
-role = "Experienced HR Assistant"
-# Structured format information
-
-from pydantic import BaseModel
-
-class Job_desciption(BaseModel):
-    role : str
-    required_skills : list[str]
-    preferred_skills : list[str]
-    experience : float | None
-    educational_requirements : list[str]
-    responsibilities : list[str]
+client=Groq(api_key=my_api_key)
+model = "openai/gpt-oss-120b"
 
 
-jd_schema = Job_desciption.model_json_schema()
+job_description="""
+Description
+About the job
+Organization: Rise ResearchLocation: Bangalore (In-person)Compensation: CompetitiveStart Date: Immediate
+About the RoleAs a Technology & Automations Associate, you'll be a critical part of RISE's team, building and scaling the internal technology and automation systems that power our operations, sales, marketing, and academic delivery. This is a hands-on role for someone who wants to apply software and automation to real-world problems at a fast-growing startup, with direct exposure to the founders.
+Responsibilities
+Design, build, and maintain automation workflows across CRM, email, onboarding, payments, and internal tools using low-code and code-based solutions
+Maintain and improve the RISE website, landing pages, and internal portals; support integrations between web forms, CRMs, databases, and analytics tools
+Write and maintain scripts, APIs, and integrations (Python, JavaScript) to connect systems and eliminate manual work
+Identify operational bottlenecks and translate them into scalable, automated systems across admissions, mentor management, finance, and customer support
+Ensure all automations, forms, and systems are reliable, well-documented, and easy for non-technical teams to use
+
+You're a Fit If You Have
+0–2 years of experience in computer science, software engineering, automation, or a related technical role
+Working knowledge of Python, JavaScript, SQL, and familiarity with website tools, APIs, and databases
+Experience with or strong interest in tools like Zapier, Make, CRMs, or workflow automation platforms
+Strong problem-solving skills and the ability to own projects from start to finish
+Comfort working in a fast-paced, globally distributed startup environment
+
+Benefits
+Competitive compensation with growth opportunities in a rapidly scaling startup
+Flexibility in working hours
+Direct exposure to founders and the opportunity to build the automation and technology backbone of a global education company from the ground up
+
+Questions: careers@riseresearch.com
+"""
+class JobD(BaseModel):
+    role: str
+    required_skills: list[str]
+    preferred_skills: list[str]
+    minimum_experience: float | None
+    education_requirements: list[str]
+    responsibilities: list[str]
+
+jobd_schema = JobD.model_json_schema()
 
 system_prompt = f"""
-You are an experienced HR assistant. Your job is to analyse the job desciptions and extract structured information from these. Return only valid json matching this schema. {jd_schema}
-Important:
- Do not return the schema itself.
- Do not return fields like "properties", "title", or "type".
- Fill this schema with the actual extracted info from this schema
+You are an expert HR assistant.
 
- If minimum experience is not mentioned, return null.
- If information from a list is missing, return an empty list.
- Do not invent information.
+Your job is to analyze job descriptions and extract
+structured information from them.
+
+Return ONLY valid JSON matching this schema:
+
+{jobd_schema}
+IMPORTANT:
+Do NOT return the schema itself.
+Do NOT return fields like "properties", "title" or "type".
+Fill the schema with actual information extracted from the job description.
+
+If minimum experience is not mentioned, return null.
+If information for a list is missing, return an empty list.
+Do not invent information.
 """
 
-message_system = {
-    "role": "system",
-    "content": system_prompt
+user_prompt = f"""
+Analyze the following job description:
+
+{job_description}
+"""
+message_system={
+    "role" : "system",
+    "content" : system_prompt
 }
-job_desciption = """Do you want to work on a product that is used by millions of people around the world daily, and growing rapidly? Do you care deeply about how software is designed with a focus on supporting global scale? Do you want to be part of a world-class team that continuously pushes the boundary of service and engineering excellence?
-
-The Office Web Shared Org in IDC is looking for a Senior Software Engineer who is passionate about working on high-scale geo-distributed WXP Shared Platform. Web Shared is gearing up for investment in world class fundamentals for Office apps like performance and reliability along with adding Copilot value to Office. If you want hands-on experience in designing, building, re-architecting the apps that truly impact the customers across the world at a scale not found often in the industry – this is the role for you.
-
-Microsoft’s mission is to empower every person and every organization on the planet to achieve more. As employees we come together with a growth mindset, innovate to empower others, and collaborate to realize our shared goals. Each day we build on our values of respect, integrity, and accountability to create a culture of inclusion where everyone can thrive at work and beyond.
-
-Responsibilities
-
-Core responsibilities include designing, owning and shipping software, writing secure, reliable, scalable and maintainable code.
-Syncing with other teams for product features that span across teams and geographies, figuring out dependencies and driving them to completion.
-You should have a solid understanding of the software development cycle.  
-Successful candidates should have ability to ramp up quickly on new technologies and adopt solution from within the company or from the Open-Source community. In addition, solid problem solving & debugging skills are necessary.  
-Candidate will be regularly participating in on call and reviewing customer feedback.  
-Candidate is expected to make architectural changes in application to make it modernize, performant and reliable.  
-Candidate will be helping other team members by actively working with them and participating in design and code reviews. Candidate will be growing team knowledge with regular knowledge sessions.  
-Candidate must be self-driven, curious to learn, proactive, result oriented, a thought leader having solid communication and influencing skills.
-Identifying opportunities to leveraging AI for making the organization more productive. 
-
-Qualifications
-
-Required/Minimum Qualifications:
-
-Bachelor's Degree in Computer Science or related technical field AND 4+ years technical engineering experience with coding in languages including, but not limited to, C, C++, C#, Java, JavaScript, or Python.
-OR equivalent experience.
-Additional Or Preferred Qualifications
-
-Other Requirements: Ability to meet Microsoft, customer and/or government security screening requirements are required for this role. These requirements include but are not limited to the following specialized security screenings:
-
-Microsoft Cloud Background Check: This position will be required to pass the Microsoft Cloud background check upon hire/transfer and every two years thereafter. 
-
-Preferred Qualifications
-
-7+ years of professional experience designing, developing, testing, and shipping software.  
-Proficiency in either service (C#, Java, etc.) and web (HTML5 and JavaScript/TypeScript, Webpack, react) technologies.  
-Demonstrated technical aptitude for architecture, design, development, debugging, testing, etc.  
-Experience with cloud platforms and services, such as Azure, AWS, or Google Cloud. 
-Deep interest in AI, machine learning, or data science, or related technologies. 
-Excellent communication, collaboration, and problem-solving skills. 
-Ability to work independently and as part of a team in a fast-paced and dynamic environment. 
-Passion for learning new skills and technologies and sharing them with others. 
-
-This position will be open for a minimum of 5 days, with applications accepted on an ongoing basis until the position is filled.
-
-Microsoft is an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to age, ancestry, citizenship, color, family or medical care leave, gender identity or expression, genetic information, immigration status, marital status, medical condition, national origin, physical or mental disability, political affiliation, protected veteran or military status, race, ethnicity, religion, sex (including pregnancy), sexual orientation, or any other characteristic protected by applicable local laws, regulations and ordinances. If you need assistance with religious accommodations and/or a reasonable accommodation due to a disability during the application process, read more about requesting accommodations."""
-
-prompt = f"""
-Analyze the following job description {job_desciption}
-"""
-message_user = {
+message_user={
     "role" : "user",
-    "content" : prompt
+    "content" : user_prompt
 }
-response_format = {
+response_format={
     "type" : "json_object"
 }
-messages = [message_system, message_user]
-response = client.chat.completions.create(model = model, messages = messages, response_format = response_format)
 
-answer = response.choices[0].message.content
 
-# Load
+messages=[message_system, message_user]
+
+response=client.chat.completions.create(model=model, messages=messages, response_format=response_format)
+
+
+answer=response.choices[0].message.content
+
+raw_json=answer
+# print(raw_json)
+
 import json
-raw_json = answer
-job_data = json.loads(raw_json)
-jobD = Job_desciption(**job_data)
+job_data=json.loads(raw_json)
 
-# You can see it directly
-print(jobD.experience)
-print(jobD.required_skills)
+job = JobD(**job_data)
 
+print(job.minimum_experience)
+print(job.education_requirements)
 
-# Parsing
+#parse real
 class MatchResult(BaseModel):
-    score : float
-    details : dict
-
+    score: float
+    details: dict
 class Experience(BaseModel):
-    company : str | None = None
-    role : str | None = None
-    duration : str | None = None
-    description : str | None = None
-    skills_used : list[str] = []
+    company: str | None = None
+    role: str | None = None
+    duration: str | None = None
+    description: str | None = None
+    skills_used: list[str] = []
 
-class resume(BaseModel):
-    name : str | None = None
-    email : str | None = None
-    phone : str | None = None
+class Resume(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
 
-    total_experience_years : float | None = None
+    total_experience_years: float | None = None
 
-    skills : list[str] = []
-    experinces : list[Experience] = []
-    education : list[str] = []
-    project : list[str] = []
-    certifications : list[str] = []
+    skills: list[str] = []
+    experiences: list[Experience] = []
+    education: list[str] = []
+    projects: list[str] = []
+    certifications: list[str] = []
 
-resume_schema = resume.model_json_schema()
 
-def final_score(job, Reusme):
+resume_schema = Resume.model_json_schema()
+def final_score(job,resume):
     match_schema = MatchResult.model_json_schema()
-    prompt = f"""You are an HR recruiter. 
+    prompt = f"""
+    You are an HR recruiter.
+
     Compare the candidate's resume with the job description.
-    
-    JOB DESCRIPTION: 
+
+    JOB DESCRIPTION:
     {job.model_dump_json(indent=2)}
 
     CANDIDATE RESUME:
-    {resume.model_dumps_json(indent = 2)}
-Return json matching this schema:
- {match_schema}
+    {resume.model_dump_json(indent=2)}
+    Return JSON matching this schema:
 
-Give me:
+    {match_schema}
 
-1- Candidate's name
-2- Matching skills
-3- Missing important skills
-4- Whether experience requirement is not
-5- Overall matching percentage 0 to 100
-6- A short final verdict.
+    Give me:
 
-Keep the response short and concised."""
+    1. Candidate name
+    2. Matching skills
+    3. Missing important skills
+    4. Whether experience requirement is met
+    5. Overall match percentage from 0 to 100
+    6. A short final verdict
 
-message= {
-    "role": "user",
-    "content" : prompt
-}
-messages = [message]
-response_format = {
-    "type" : "json_object",
-}
+    Keep the response concise and easy to read.
+    """
+    message={
+        "role": "user",
+        "content" : prompt
+    }
+    messages=[message]
+    response_format={
+        "type": "json_object"
+    }
+    response = client.chat.completions.create(model=model, messages=messages, response_format=response_format)
+    data = json.loads(response.choices[0].message.content)
+    return MatchResult(**data)
+def parse_resume(resume_text):
+    system_prompt = f"""
+    You are an expert resume parser.
 
-response = client.chat.completions.create(model = model, messages = messages, response_format = response_format)
+    Extract information from the resume based on its meaning,
+    not only based on exact section headings.
+
+    Different resumes may use different headings.
+
+    For example:
+    - Experience
+    - Professional Experience
+    - Work History
+    - Employment
+    - Internships
+
+    These may all contain relevant experience.
+
+    Skills may also appear in the skills section, work experience,
+    internships or projects.
+
+    Return ONLY valid JSON matching this schema:
+
+    {resume_schema}
+
+    Important rules:
+
+    1. Do not invent information.
+    2. If a value is not available, return null.
+    3. If a list has no information, return an empty list.
+    4. Include internships inside experiences.
+    5. Extract skills mentioned across the entire resume.
+    """
+    user_prompt = f"""
+    Parse the following resume:
+
+    {resume_text}
+    """
+    message_system={
+        "role" : "system",
+        "content" : system_prompt
+    }
+    message_user={
+        "role" : "user",
+        "content" : user_prompt
+    }
+    messages=[message_system, message_user]
+    response_format={
+        "type": "json_object"
+    }
+    response=client.chat.completions.create(model=model, messages=messages, response_format=response_format)
+    raw_output = response.choices[0].message.content
+    data = json.loads(raw_output)
+    resume = Resume(**data)
+    return resume
+
+
+from pypdf import PdfReader
+from docx import Document
+def read_pdf(file_path):
+    reader = PdfReader(file_path)
+    text = ""
+    for page in reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + "\n"
+    return text
+
+def read_docx(file_path):
+    document = Document(file_path)
+    text = ""
+    for paragraph in document.paragraphs:
+        if paragraph.text.strip():
+            text += paragraph.text + "\n"
+    
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                if cell.text.strip():
+                    text += cell.text + "\n"
+    return text
+
+
+def read_resume(file_path):
+    if file_path.suffix.lower() == ".pdf":
+        return read_pdf(file_path)
+    elif file_path.suffix.lower() == ".docx":
+        return read_docx(file_path)
+    else:
+        return None
+
+
+
+# lets do it now
+resume_folder = Path("resume")
+all_results=[]
+for file_path in resume_folder.iterdir():
+    #C:\Users\Pratyush\padho_with_pratyush\week1\day5\resumes\abhay resume new - Abhay Singh.pdf
+    if file_path.suffix.lower() not in [".pdf", ".docx"]:
+        continue
+    print("\nProcessing:", file_path.name)
+    resume_text = read_resume(file_path)
+    parsed_resume=parse_resume(resume_text) # llm call1
+    time.sleep(5)
+    result = final_score(job, parsed_resume) #llm caLL2
+    #score and details
+    #acount chtgpt
+    # request bhejna shhur krega millions
+    #chattgot server jam ho jayega
+    time.sleep(5)
+    print("Score:", result.score)
+    all_results.append({
+        "name": parsed_resume.name,
+        "score": result.score,
+        "details": result.details
+    })
+all_results.sort(
+    key=lambda candidate: candidate["score"],
+    reverse=True
+)
+top_2 = all_results[:2]
+worst_2 = all_results[-2:]
+
+
+print("TOP 2 CANDIDATES")
+for candidate in top_2:
+
+    print(
+        candidate["name"],
+        "-",
+        candidate["score"],
+        "%"
+    )
+
+    print(candidate["details"])
+
+print("LOWEST 2 CANDIDATES")
+for candidate in worst_2:
+
+    print(
+        candidate["name"],
+        "-",
+        candidate["score"],
+        "%"
+    )
+    print(candidate["details"])
