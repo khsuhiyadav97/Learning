@@ -7,7 +7,16 @@ authors = [
     { name = "khushiyadav97", email = "ky622933@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastapi>=0.143.2",
+    "groq>=1.7.0",
+    "pydantic>=2.14.1",
+    "pypdf>=6.20.1",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.2.4",
+    "requests>=2.34.2",
+    "uvicorn>=0.54.0",
+]
 
 [project.scripts]
 week2-project = "week2_project:main"
