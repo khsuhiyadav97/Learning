@@ -14,11 +14,13 @@ def read_pdf(file_path : Path):
 
         if page_text:
             text += page_text + "\n"
-            
+
     return text
 
 @app.get("/")
 def home():
+    resume_text = read_pdf(Path("E:/AI/week2/week2_project/backend/Khushee_resume.pdf"))
+    print(resume_text)
     return{
-        "message": "New Your App is running"
+        "message": "resume parsed"
     }
