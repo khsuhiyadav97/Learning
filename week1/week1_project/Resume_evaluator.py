@@ -267,18 +267,15 @@ def read_resume(file_path):
 resume_folder = Path("resume")
 all_results=[]
 for file_path in resume_folder.iterdir():
-    #C:\Users\Pratyush\padho_with_pratyush\week1\day5\resumes\abhay resume new - Abhay Singh.pdf
+    
     if file_path.suffix.lower() not in [".pdf", ".docx"]:
         continue
     print("\nProcessing:", file_path.name)
     resume_text = read_resume(file_path)
     parsed_resume=parse_resume(resume_text) # llm call1
     time.sleep(5)
-    result = final_score(job, parsed_resume) #llm caLL2
-    #score and details
-    #acount chtgpt
-    # request bhejna shhur krega millions
-    #chattgot server jam ho jayega
+    result = final_score(job, parsed_resume) # llm caLL2
+    
     time.sleep(5)
     print("Score:", result.score)
     all_results.append({
