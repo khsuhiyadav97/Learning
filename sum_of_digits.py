@@ -19,33 +19,23 @@ print(sum_of_digits(1234))
 # 2. Count even digits
 # Given a positive integer N, count how many of its digits are even. The digit 0 is even.
 # Input: 20481  →  Output: 3
-# def count_digits(n):
-#     n = abs(n)
-#     count = 0
 
-#     if n == 0:
-#         count = 1
-#     while n > 0:
-#         n //= 10
-#         count += 1
+def count_digits(n):
+    n = abs(n)
+    count = 0
 
-#     if n % 2 == 0:
-#             return count
-#     return None
+    if n == 0:
+        count = 1
+    while n > 0:
+        n %= 10
+        count += 1
 
-# print(count_digits(12450))
+        if n % 2 == 0:
+            return count
+
+print(count_digits(12450))
 
 #reverse a number
-def reverse_num(n):
-    n = abs(n)
-    reverse = 0
 
-    while n > 0:
-        last_digit = n % 10
-        reverse = (reverse * 10) + last_digit
-        n //= 10
-        return reverse
-
-print(reverse_num(1236784))
 
 
