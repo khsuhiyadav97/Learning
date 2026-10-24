@@ -34,3 +34,18 @@ print(sum_of_digits(1234))
 #     return None
 
 # print(count_digits(12450))
+
+#reverse a number
+def reverse_num(n):
+    n = abs(n)
+    reverse = 0
+
+    while n > 0:
+        last_digit = n % 10
+        reverse = (reverse * 10) + last_digit
+        n //= 10
+        return reverse
+
+print(reverse_num(1236784))
+
+
