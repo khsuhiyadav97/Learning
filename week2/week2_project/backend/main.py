@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pathlib import Path
 from pypdf import PdfReader
+from groq import groq
+
 
 app=FastAPI()
 
